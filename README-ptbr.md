@@ -5,6 +5,8 @@ Readme: [English](README.md)
 ![Licença](https://img.shields.io/github/license/sr00t3d/cpanel-reseller-usage)
 ![Script Shell](https://img.shields.io/badge/shell-script-green)
 
+<img width="700" alt="BindFilter" src="cpanel-reseller-usage-cover.webp" />
+
 Um script Bash projetado para administradores de sistemas cPanel/WHM. Ele calcula o uso real de disco (via `du`) para um Revendedor específico e todas as suas subcontas, gerando um relatório de texto formatado.
 
 ## 🚀 Funcionalidades
