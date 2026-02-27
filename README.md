@@ -1,6 +1,6 @@
 # cPanel Reseller Disk Usage Reporter
 
-Readme: [Português](README-ptbr.md)
+Readme: [BR](README-ptbr.md)
 
 ![License](https://img.shields.io/github/license/sr00t3d/cpanel-reseller-usage)
 ![Shell Script](https://img.shields.io/badge/shell-script-green)
@@ -25,21 +25,34 @@ A Bash script designed for cPanel/WHM system administrators. It calculates the a
 
 ## 🔧 Usage
 
-1.  Download the script to your server.
-2.  Make it executable:
-    ```bash
-    chmod +x cp-reseller-usage.sh
-    ```
-3.  Run the script providing the **Reseller's Username** as an argument:
-    ```bash
-    ./cp-reseller-usage.sh.sh myreseller
-    ```
+1. **Download the file to the server:**
 
-## 📄 Output Example
+```bash
+curl -O https://raw.githubusercontent.com/sr00t3d/cpanel-reseller-usage/refs/heads/main/cp-reseller-usage.sh
+```
 
-The script generates a file named `usage-report-myreseller.txt` in the current directory:
+2. **Give execution permission:**
 
-```text
+```bash
+chmod +x cp-reseller-usage.sh
+```
+
+3. **Execute the script:**
+
+```bash
+./cp-reseller-usage.sh RESELLER
+```
+
+## 📄 Exemplo
+
+```bash
+./cp-reseller-usage.sh root
+Generating report for reseller: root...
+Progress: 100% (6/6) 
+
+Report generated successfully: ./usage-report-root.txt
+
+cat ./usage-report-root.txt
 Account         Disk Usage (GB)
 -----------------------------------
 client_a              2.45 GB
@@ -57,7 +70,7 @@ Since this script runs du -sm on every user's home directory, it performs a real
 ## ⚠️ Legal Notice
 
 > [!WARNING]
-> This software is provided "as is". Always make sure to test first in a development environment. The author is not responsible for any misuse, legal consequences, or data impact caused by this tool.
+> This software is provided "as is." Always ensure you have explicit permission before executing it. The author is not responsible for any misuse, legal consequences, or data impact caused by this tool.
 
 ## 📚 Detailed Tutorial
 

@@ -1,9 +1,9 @@
 # Relatório de Uso de Disco de Revendedor cPanel
 
-Readme: [English](README.md)
+Readme: [EN](README.md)
 
-![Licença](https://img.shields.io/github/license/sr00t3d/cpanel-reseller-usage)
-![Script Shell](https://img.shields.io/badge/shell-script-green)
+![License](https://img.shields.io/github/license/sr00t3d/cpanel-reseller-usage)
+![Shell Script](https://img.shields.io/badge/shell-script-green)
 
 <img width="700" alt="BindFilter" src="cpanel-reseller-usage-cover.webp" />
 
@@ -25,22 +25,35 @@ Um script Bash projetado para administradores de sistemas cPanel/WHM. Ele calcul
 
 ## 🔧 Uso
 
-1.  Baixe o script para o seu servidor.
-2.  Torne-o executável:
-    ```bash
-    chmod +x cp-reseller-usage.sh
-    ```
-3.  Execute o script fornecendo o **Nome de Usuário do Revendedor** como argumento:
-    ```bash
-    ./cp-reseller-usage.sh.sh myreseller
-    ```
+1. **Baixe o arquivo no servidor:**
 
-## 📄 Exemplo de Saída
+```bash
+curl -O https://raw.githubusercontent.com/sr00t3d/cpanel-reseller-usage/refs/heads/main/cp-reseller-usage.sh
+```
 
-O script gera um arquivo chamado `usage-report-myreseller.txt` no diretório atual:
+2. **Dê permissão de execução:**
 
-```text
-Conta          Uso de Disco (GB)
+```bash
+chmod +x cp-reseller-usage.sh
+```
+
+3. **Execute o script:**
+
+```bash
+./cp-reseller-usage.sh REVENDEDOR
+```
+
+## 📄 Exemplo
+
+```bash
+./cp-reseller-usage.sh root
+Generating report for reseller: root...
+Progress: 100% (6/6) 
+
+Report generated successfully: ./usage-report-root.txt
+
+cat ./usage-report-root.txt
+Account         Disk Usage (GB)
 -----------------------------------
 client_a              2.45 GB
 client_b              0.89 GB
@@ -57,11 +70,11 @@ Como este script executa `du -sm` no diretório home de cada usuário, ele reali
 ## ⚠️ Aviso Legal
 
 > [!WARNING]
-> Este software é fornecido "como está". Sempre certifique-se de testar primeiro em um ambiente de desenvolvimento. O autor não é responsável por qualquer uso indevido, consequências legais ou impacto nos dados causados por esta ferramenta.
+> Este software é fornecido "tal como está". Certifique-se sempre de ter permissão explícita antes de executar. O autor não se responsabiliza por qualquer uso indevido, consequências legais ou impacto nos dados causados ​​por esta ferramenta.
 
-## 📚 Tutorial Detalhado
+## 📚 Detailed Tutorial
 
-Para um guia completo passo a passo, confira meu artigo completo:
+Para um guia completo, passo a passo, confira meu artigo completo:
 
 👉 [**Verificar tamanho das contas filhas do revendedor no WHM.**](https://perciocastelo.com.br/blog/check-size-of-reseller-child-accounts-in-whm.html)
 

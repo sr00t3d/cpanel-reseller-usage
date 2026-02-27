@@ -1,11 +1,16 @@
-#!/bin/bash
-# ------------------------------------------------------------------------------
-# Script: reseller_usage_report.sh
-# Description: Generates a disk usage report for a specific Reseller and 
-#              their sub-accounts on a cPanel/WHM server.
-#
-# Usage: ./reseller_usage_report.sh RESELLER_USERNAME
-# ------------------------------------------------------------------------------
+#!/usr/bin/env bash
+# ╔═══════════════════════════════════════════════════════════════════════════╗
+# ║                                                                           ║
+# ║   cPanel Reseller Usage v1.0.0                                            ║
+# ║                                                                           ║
+# ╠═══════════════════════════════════════════════════════════════════════════╣
+# ║   Autor:   Percio Castelo                                                 ║
+# ║   Contato: percio@evolya.com.br | contato@perciocastelo.com.br            ║
+# ║   Web:     https://perciocastelo.com.br                                   ║
+# ║                                                                           ║
+# ║   Função:  Generates a disk usage report for a specific Reseller and      ║
+# ║            their sub-accounts on a cPanel/WHM server.                     ║
+# ╚═══════════════════════════════════════════════════════════════════════════╝
 
 # Check for required dependencies
 if ! command -v bc >/dev/null 2>&1; then
