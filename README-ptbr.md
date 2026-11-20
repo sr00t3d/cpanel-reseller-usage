@@ -1,90 +1,166 @@
-# Relatório de Uso de Disco de Revendedor cPanel
+# cPanel Reseller Disk Usage Reporter
 
 Readme: [EN](README.md)
 
-![License](https://img.shields.io/github/license/sr00t3d/cpanel-reseller-usage) ![Shell Script](https://img.shields.io/badge/shell-script-green)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/version-2.0.0-green.svg)](https://github.com/sr00t3d/cpanel-reseller-usage/releases)
+[![Shell](https://img.shields.io/badge/bash-4.0+-blue.svg)](https://www.gnu.org/software/bash/)
 
-<img width="700" alt="BindFilter" src="cpanel-reseller-usage-cover.webp" />
+<img width="700" src="cpanel-reseller-usage-cover.webp" alt="cPanel Reseller Disk Usage Reporter" />
 
-Um script Bash projetado para administradores de sistemas cPanel/WHM. Ele calcula o uso real de disco (via `du`) para um Revendedor específico e todas as suas subcontas, gerando um relatório de texto formatado.
+**cPanel Reseller Disk Usage Reporter v2.0.0** e uma ferramenta CLI em Bash sem dependencias externas para administradores cPanel/WHM que audita o consumo real de disco (`du -sm`) de um Revendedor e todas as suas subcontas em servidores multi-particao (`/home`, `/home2`, `/home3`, ...), calculando totais em MB/GB, percentual de uso por conta, ordenacao e exportacao em tabela, JSON ou CSV.
+
+---
 
 ## Funcionalidades
 
-* **Busca de Revendedor:** Identifica automaticamente todas as contas filhas pertencentes a um revendedor específico usando `/etc/trueuserowners`.
-* **Cálculo de Uso Real:** Utiliza `du` (uso de disco) varrendo o sistema de arquivos, garantindo um relatório preciso dos tamanhos dos arquivos, mesmo se as cotas do cPanel estiverem fora de sincronia.
-* **Saída Formatada:** Gera um arquivo de texto limpo e alinhado com o uso em GB.
-* **Acompanhamento de Progresso:** Exibe uma barra de progresso em tempo real durante a execução (útil para revendedores com muitas contas).
+- **Resolucao Multi-Particao de Home**: localiza o diretorio real de cada subconta via `getent passwd` (com fallback para `/home`, `/home2`, `/home3`, `/home4`)
+- **Zero Dependencias Externas**: usa aritmetica nativa em `awk`, dispensando a instalacao do pacote `bc`
+- **Descoberta de Revendedores (`--list-resellers`)**: lista todos os revendedores unicos e a quantidade de subcontas a partir do `/etc/trueuserowners`
+- **Analise e Filtros**: calcula `% Share` por subconta, ordena por `--sort size` (decrescente) ou `--sort name` e permite filtrar por `--min-mb N`
+- **Simulacao Dry-Run (`--dry-run`)**: descobre contas e diretorios home sem executar `du`
+- **Relatorios Multi-Formato (`-o table|json|csv`) e `--save PATH`**: imprime em stdout para pipelines ou salva em arquivo protegido com `chmod 600`
 
-## Pré-requisitos
+---
 
-* **Sistema Operacional:** CentOS/AlmaLinux/CloudLinux com cPanel & WHM instalados.
-* **Permissões:** Deve ser executado como `root` para acessar diretórios `/home/` de outros usuários.
-* **Dependências:** `bc` (Basic Calculator) deve estar instalado para cálculos com ponto flutuante.
-  * Instale via: `yum install bc` ou `apt install bc`.
+## Requisitos
 
-## Uso
+- Servidor Linux cPanel/WHM com Bash 4+
+- Utilitarios padrao (`du`, `awk`, `sort`, `getent`)
+- Permissao root (ou leitura equivalente) sobre os diretorios home das subcontas
 
-### Modo hospedado
+---
 
-1. **Baixe o arquivo no servidor:**
-
-```bash
-curl -O https://raw.githubusercontent.com/sr00t3d/cpanel-reseller-usage/refs/heads/main/cp-reseller-usage.sh
-```
-
-2. **Dê permissão de execução:**
+## Instalacao
 
 ```bash
+curl -fsSLO https://raw.githubusercontent.com/sr00t3d/cpanel-reseller-usage/main/cp-reseller-usage.sh
 chmod +x cp-reseller-usage.sh
 ```
 
-3. **Execute o script:**
+---
+
+## Uso
 
 ```bash
-./cp-reseller-usage.sh REVENDEDOR
+./cp-reseller-usage.sh <REVENDEDOR> [OPCOES]
+./cp-reseller-usage.sh --list-resellers [OPCOES]
+
+Opcoes:
+  -r, --reseller USER     Usuario do revendedor a auditar
+  --list-resellers        Lista todos os revendedores encontrados em /etc/trueuserowners
+  --owners-file PATH      Caminho alternativo do arquivo trueuserowners
+  --sort MODE             Ordenacao: size (padrao, decrescente) ou name (crescente)
+  --min-mb N              Inclui apenas contas com consumo minimo de N MB (padrao: 0)
+  --save PATH             Salva copia do relatorio em arquivo (chmod 600)
+  --dry-run               Lista contas e diretorios sem executar du
+  -o, --output FORMATO    Formato de saida: table (padrao), json, csv
+  -q, --quiet             Suprime saida padrao (mantem erros em stderr)
+  --no-color              Desativa cores ANSI
+  -V, --version           Exibe a versao e encerra
+  -h, --help              Exibe a ajuda e encerra
 ```
 
-### Modo direto
+### Exemplos
 
 ```bash
-bash <(curl -fsSL 'https://raw.githubusercontent.com/sr00t3d/cpanel-reseller-usage/refs/heads/main/cp-reseller-usage.sh') RESELLER
+# Listar todos os revendedores do servidor
+./cp-reseller-usage.sh --list-resellers
+
+# Inspecionar contas do revendedor sem executar du
+./cp-reseller-usage.sh agencia01 --dry-run
+
+# Auditar revendedor ordenado por maior consumo e salvar relatorio chmod 600
+./cp-reseller-usage.sh agencia01 --sort size --save /root/usage-agencia01.txt
+
+# Filtrar contas >= 500 MB com saida JSON
+./cp-reseller-usage.sh agencia01 --min-mb 500 -o json
+
+# Exportar CSV para planilhas de capacidade e faturamento
+./cp-reseller-usage.sh agencia01 -o csv
 ```
 
-## Exemplo
+---
 
-```bash
-./cp-reseller-usage.sh root
-Generating report for reseller: root...
-Progress: 100% (6/6) 
+## Exemplo de Saida Real
 
-Report generated successfully: ./usage-report-root.txt
+Capturado em servidor AlmaLinux 8.10 com cPanel/WHM:
 
-cat ./usage-report-root.txt
-Account         Disk Usage (GB)
------------------------------------
-client_a              2.45 GB
-client_b              0.89 GB
-client_c             15.20 GB
------------------------------------
-TOTAL: 18.54 GB
+### Listar revendedores (`--list-resellers`)
+
+```text
+$ ./cp-reseller-usage.sh --list-resellers --owners-file /tmp/reseller-e2e/trueuserowners --no-color
+
+cPanel Resellers (/tmp/reseller-e2e/trueuserowners)
++----------------------+----------+
+| Reseller             | Accounts |
++----------------------+----------+
+| agencia01            |        3 |
+| root                 |        1 |
++----------------------+----------+
 ```
 
-## Nota de Desempenho
-Como este script executa `du -sm` no diretório home de cada usuário, ele realiza uma varredura real de I/O no sistema de arquivos.
-- Revendedores Pequenos/Médios: Executa rapidamente.
-- Revendedores Grandes: Se um revendedor tiver centenas de contas ou contas com milhões de arquivos pequenos (inodes), a execução pode levar algum tempo.
+### Saida em tabela (padrao)
 
-## Aviso Legal
+```text
+$ ./cp-reseller-usage.sh agencia01 --owners-file /tmp/reseller-e2e/trueuserowners --save /tmp/reseller-e2e/report.txt --no-color
 
-> [!WARNING]
-> Este software é fornecido "tal como está". Certifique-se sempre de ter permissão explícita antes de executar. O autor não se responsabiliza por qualquer uso indevido, consequências legais ou impacto nos dados causados ​​por esta ferramenta.
+cPanel Reseller Disk Usage Reporter v2.0.0
+Host      : cpanel-test.local
+Reseller  : agencia01
+Accounts  : 3 (min-mb: 0, sort: size)
+Dry-Run   : no
+Status    : SUCCESS
+Timestamp : 2026-11-20T06:30:16Z
 
-## Detailed Tutorial
++------------------+------------------------+----------+----------+--------+--------------+
+| Account          | Home Directory         |       MB |       GB |  Share | Status       |
++------------------+------------------------+----------+----------+--------+--------------+
+| e2e_client1      | /home/e2e_client1      |       13 |     0.01 |  68.4% | OK           |
+| e2e_client2      | /home/e2e_client2      |        5 |     0.00 |  26.3% | OK           |
+| percio           | /home/percio           |        1 |     0.00 |   5.3% | OK           |
++------------------+------------------------+----------+----------+--------+--------------+
+TOTAL     : 19 MB (0.02 GB) across 3 account(s)
+```
 
-Para um guia completo, passo a passo, confira meu artigo completo:
+### Saida JSON (`-o json`)
 
-👉 [**Verificar tamanho das contas filhas do revendedor no WHM.**](https://perciocastelo.com.br/blog/check-size-of-reseller-child-accounts-in-whm.html)
+```json
+{
+  "version": "2.0.0",
+  "status": "SUCCESS",
+  "hostname": "cpanel-test.local",
+  "reseller": "agencia01",
+  "owners_file": "/tmp/reseller-e2e/trueuserowners",
+  "accounts_count": 3,
+  "total_mb": 19,
+  "total_gb": 0.02,
+  "errors": 0,
+  "dry_run": false,
+  "timestamp": "2026-11-20T06:30:16Z",
+  "accounts": [
+    {"user": "e2e_client1", "home": "/home/e2e_client1", "mb": 13, "gb": 0.01, "share_pct": 68.4, "status": "OK"},
+    {"user": "e2e_client2", "home": "/home/e2e_client2", "mb": 5, "gb": 0.00, "share_pct": 26.3, "status": "OK"},
+    {"user": "percio", "home": "/home/percio", "mb": 1, "gb": 0.00, "share_pct": 5.3, "status": "OK"}
+  ]
+}
+```
 
-## Licença
+### Saida CSV (`-o csv`)
 
-Este projeto está licenciado sob a **GNU General Public License v3.0**. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+```csv
+timestamp,reseller,user,home,mb,gb,share_pct,status
+2026-11-20T06:30:16Z,"agencia01","e2e_client1","/home/e2e_client1",13,0.01,68.4,OK
+2026-11-20T06:30:16Z,"agencia01","e2e_client2","/home/e2e_client2",5,0.00,26.3,OK
+2026-11-20T06:30:16Z,"agencia01","percio","/home/percio",1,0.00,5.3,OK
+```
+
+---
+
+## Licenca
+
+Apache-2.0. Consulte [LICENSE](LICENSE) para detalhes.
+
+## Autor
+
+[Percio Castelo](https://perciocastelo.com.br)
